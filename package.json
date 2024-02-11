@@ -1,0 +1,24 @@
+{
+  "name": "@xurizaemon/eleventy-immich",
+  "version": "0.0.0",
+  "description": "Provides shortcodes and embed functionality to integrate Immich media into Eleventy.",
+  "main": "immich.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xurizaemon/eleventy-immich.git"
+  },
+  "keywords": [
+    "eleventy",
+    "eleventy-utility"
+  ],
+  "author": {
+    "name": "Chris Burgess",
+    "email": "chris@giantrobot.co.nz",
+    "url": "https://chris.bur.gs/"
+  },
+  "license": "AGPLv3+",
+  "bugs": {
+    "url": "https://github.com/xurizaemon/eleventy-immich/issues"
+  },
+  "homepage": "https://github.com/xurizaemon/eleventy-immich#readme"
+}
