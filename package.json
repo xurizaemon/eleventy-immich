@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/xurizaemon/eleventy-immich/issues"
   },
-  "homepage": "https://github.com/xurizaemon/eleventy-immich#readme"
+  "homepage": "https://github.com/xurizaemon/eleventy-immich#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "@11ty/eleventy-fetch": "^4.0.0",
+    "@11ty/eleventy-img": "^4.0.1"
+  }
 }
