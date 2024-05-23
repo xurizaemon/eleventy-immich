@@ -11,8 +11,7 @@ module.exports = function immich(eleventyConfig) {
     let required_vars = ['IMMICH_BASE_URL', 'IMMICH_API_KEY'];
     for (name of required_vars) {
         if (!process.env[name]) {
-            console.error(`Immich plugin requires setting the following env vars: ${required_vars.join(', ')}`);
-            // @TODO Can I bail out here somehow?
+            throw new Error(`Immich plugin requires setting the following env vars: ${required_vars.join(', ')}`);
         }
     }
 
@@ -64,7 +63,7 @@ module.exports = function immich(eleventyConfig) {
      * @returns {Promise<string>} - A promise that resolves to the generated HTML for the image element.
      */
     async function immichImageShortcode(uuid) {
-        let assetDataUrl = `${immichUrl}/api/asset/assetById/${uuid}`;
+        let assetDataUrl = `${immichUrl}/api/asset/${uuid}`;
         let assetFileUrl = `${immichUrl}/api/asset/file/${uuid}`;
         let fetchOptions = defaultFetchOptions;
 
