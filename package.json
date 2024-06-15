@@ -9,8 +9,7 @@
   },
   "scripts": {
     "pretest": "eslint immich.js test/**.js",
-    "test": "ava --no-worker-threads",
-    "sample": "cd sample && node sample.js"
+    "test": "ava --no-worker-threads"
   },
   "keywords": [
     "eleventy",
