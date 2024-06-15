@@ -23,6 +23,17 @@ module.exports = function immich(eleventyConfig) {
         }
     };
 
+    // Verify connectivity.
+    EleventyFetch(`${immichUrl}/api/users/me`, {
+        type: 'json',
+        fetchOptions: {
+            ...defaultFetchOptions,
+            ...{accept: 'application/json'}
+        }
+    }).then((res, rej) => {
+        console.log(`Connected to Immich as ${res.name}.`);
+    });
+
     /**
      * Fetches an album and renders each asset.
      *
