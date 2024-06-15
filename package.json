@@ -8,8 +8,8 @@
     "url": "git+https://github.com/xurizaemon/eleventy-immich.git"
   },
   "scripts": {
-    "pretest": "eslint immich.js test/**.js",
-    "test": "ava --no-worker-threads"
+    "pretest": "npx eslint immich.js test/**.js",
+    "test": "npx ava --no-worker-threads"
   },
   "keywords": [
     "eleventy",
