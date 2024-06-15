@@ -7,9 +7,9 @@
 const EleventyFetch = require("@11ty/eleventy-fetch");
 const Image = require("@11ty/eleventy-img");
 
-module.exports = function immich(eleventyConfig) {
+function EleventyImmich(eleventyConfig) {
   let required_vars = ['IMMICH_BASE_URL', 'IMMICH_API_KEY'];
-  for (name of required_vars) {
+  for (let name of required_vars) {
     if (!process.env[name]) {
       throw new Error(`Immich plugin requires setting the following env vars: ${required_vars.join(', ')}`);
     }
@@ -30,7 +30,7 @@ module.exports = function immich(eleventyConfig) {
       ...defaultFetchOptions,
       ...{accept: 'application/json'}
     }
-  }).then((res, rej) => {
+  }).then((res) => {
     console.log(`Connected to Immich as ${res.name}.`);
   });
 
@@ -58,7 +58,7 @@ module.exports = function immich(eleventyConfig) {
     }
     if (albumData.assets.length) {
       html += '<div class="immich-album-assets">';
-      for (asset of albumData.assets) {
+      for (let asset of albumData.assets) {
         html += await immichImageShortcode(asset.id);
       }
       html += '</div>';
@@ -111,36 +111,11 @@ module.exports = function immich(eleventyConfig) {
     return Promise.resolve(Image.generateHTML(metadata, attributes));
   }
 
-  /**
-     * Retrieves a collection of Immich albums.
-     *
-     * @returns {Promise<Array>} A promise that resolves to an array of albums.
-     *                            Each album is represented as an object in the array.
-     *                            If an error occurs, an empty array is returned.
-     */
-  async function immichAlbumsCollection() {
-    try {
-      let albums = await EleventyFetch(`${immichUrl}/api/album`, {
-        duration: "1d",
-        type: "json",
-        fetchOptions: {
-          ...defaultFetchOptions,
-          ...{ accept: 'application/json' }
-        }
-      });
-
-      for (album of albums) {
-        collection.push(album);
-      }
-      return collection;
-    }
-    catch(e) {
-      console.log( "Failed getting Immich albums" );
-      console.log(e, 'exception');
-    }
-  }
-
   // eleventyConfig.addCollection("immich_albums", immichAlbumsCollection);
   eleventyConfig.addShortcode("immich_album", immichAlbumShortcode);
   eleventyConfig.addShortcode("immich_image", immichImageShortcode);
+};
+
+module.exports = {
+  EleventyImmich
 };
