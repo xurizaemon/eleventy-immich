@@ -1,29 +1,20 @@
-name: Node.js CI
+name: NPM Publish
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - v*
 
 jobs:
-  build:
-
+  publish-npm:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version:
-          - '20.x'
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm install --production=false
-      - run: npm run build --if-present
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
       - run: npm test
         env:
           IMMICH_BASE_URL: ${{ secrets.IMMICH_BASE_URL }}
@@ -33,3 +24,6 @@ jobs:
           IMMICH_TEST_IMAGE_DESCRIPTION: ${{ secrets.IMMICH_TEST_IMAGE_DESCRIPTION }}
           IMMICH_TEST_IMAGE_UUID: ${{ secrets.IMMICH_TEST_IMAGE_UUID }}
           IMMICH_TEST_ALBUM_UUID: ${{ secrets.IMMICH_TEST_ALBUM_UUID }}
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
