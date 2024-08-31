@@ -1,10 +1,8 @@
-const ava = require("ava");
+const test = require("ava");
 const { immichAlbumShortcode } = require("../immich.js");
 
-ava("Test album shortcode output", async t => {
+test("Test album shortcode output", async t => {
   let html = await immichAlbumShortcode(process.env.IMMICH_TEST_ALBUM_UUID);
-  let reTitle = new RegExp(`<div class="immich-album"><h2>${process.env.IMMICH_TEST_ALBUM_TITLE}</h2>`);
-  let reDescription = new RegExp(`<p>${process.env.IMMICH_TEST_ALBUM_DESCRIPTION}</p>`);
-  t.regex(html, reTitle);
-  t.regex(html, reDescription);
+  t.regex(html, new RegExp(`<div class="immich-album"><h2>${process.env.IMMICH_TEST_ALBUM_TITLE}</h2>`));
+  t.regex(html, new RegExp(`<p>${process.env.IMMICH_TEST_ALBUM_DESCRIPTION}</p>`));
 });

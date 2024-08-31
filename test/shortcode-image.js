@@ -1,10 +1,8 @@
-const ava = require("ava");
+const test = require("ava");
 const { immichImageShortcode } = require("../immich.js");
 
-ava("Test image shortcode output", async t => {
+test("Test image shortcode output", async t => {
   let html = await immichImageShortcode(process.env.IMMICH_TEST_IMAGE_UUID);
-  let reAlt = new RegExp(`<img alt="${process.env.IMMICH_TEST_IMAGE_DESCRIPTION}"`);
-  let reSrc = new RegExp('src="/media/img/');
-  t.regex(html, reAlt);
-  t.regex(html, reSrc);
+  t.regex(html, new RegExp(`alt="${process.env.IMMICH_TEST_IMAGE_DESCRIPTION}"`));
+  t.regex(html, new RegExp('src="/media/img/'));
 });
