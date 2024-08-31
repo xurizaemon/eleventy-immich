@@ -1,5 +1,5 @@
 const ava = require("ava");
-const { immichAlbumShortcode, immichImageShortcode } = require("../immich.js");
+const { immichAlbumShortcode } = require("../immich.js");
 
 ava("Test album shortcode output", async t => {
   let html = await immichAlbumShortcode(process.env.IMMICH_TEST_ALBUM_UUID);
