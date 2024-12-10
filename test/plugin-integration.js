@@ -1,6 +1,6 @@
 const test = require("ava");
 const Eleventy = require("@11ty/eleventy");
-// const EleventyImmich = require('../immich');
+const { EleventyImmich } = require('../immich');
 const path = require("path");
 
 function getContentFor(results, filename) {
@@ -20,7 +20,14 @@ test("Load plugin into Eleventy, check output", async (t) => {
   };
 
   let elev = new Eleventy(EleventyConfig.dir.input, EleventyConfig.dir.output, {
-    configPath: path.join(__dirname, "fixtures", "stub", "eleventy.config.js")
+    configPath: path.join(__dirname, "fixtures", "stub", "eleventy.config.js"),
+    config: function (eleventyConfig) {
+      eleventyConfig.setUseTemplateCache(false);
+      eleventyConfig.addPlugin(EleventyImmich, {
+        api_url: process.env['IMMICH_BASE_URL'],
+        api_key: process.env['IMMICH_API_KEY'],
+      });
+    }
   });
 
   let results = await elev.toJSON();

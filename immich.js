@@ -175,11 +175,21 @@ function immichConfig() {
  *
  * @param {Object} eleventyConfig - The Eleventy config object.
  */
-function EleventyImmich(eleventyConfig) {
-  let config = immichConfig();
+function EleventyImmich(eleventyConfig, config) {
+  ['api_url', 'api_key'].forEach(required => {
+    if (!config[required]) {
+      throw new Error(`EleventyImmich requires config ${required}`);
+    }
+  });
+  if (!config.api_url) {
+    throw new Error('EleventyImmich config "api_url" not found.')
+  }
+  if (!config.api_key) {
+    throw new Error('EleventyImmich config "api_key" not found.')
+  }
 
   // Verify connectivity.
-  EleventyFetch(`${config.url}/api/users/me`, {
+  EleventyFetch(`${config.api_url}/api/users/me`, {
     type: 'json',
     fetchOptions: {
       ...config.defaultFetchOptions,
