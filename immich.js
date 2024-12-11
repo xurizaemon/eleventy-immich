@@ -22,8 +22,8 @@ async function immichGetAlbumData(uuid) {
     type: "json",
     fetchOptions: {
       ...config.defaultFetchOptions,
-      ...{ accept: 'application/json' }
-    }
+      ...{ accept: "application/json" },
+    },
   });
 }
 
@@ -39,23 +39,23 @@ async function immichGetImageData(uuid) {
   let assetFileUrl = `${config.url}/api/assets/${uuid}/original`;
   let fetchOptions = config.defaultFetchOptions;
 
-  fetchOptions.headers.accept = 'application/json';
+  fetchOptions.headers.accept = "application/json";
   let assetData = await EleventyFetch(assetDataUrl, {
     duration: "10m",
     type: "json",
-    fetchOptions: fetchOptions
+    fetchOptions: fetchOptions,
   });
 
-  fetchOptions.headers.accept = 'application/octet-stream';
+  fetchOptions.headers.accept = "application/octet-stream";
   let assetFile = await EleventyFetch(assetFileUrl, {
     duration: "1w",
     type: "buffer",
-    fetchOptions: fetchOptions
+    fetchOptions: fetchOptions,
   });
 
   return {
     assetData: assetData,
-    assetFile: assetFile
+    assetFile: assetFile,
   };
 }
 
@@ -80,9 +80,9 @@ async function immichRenderAlbum(album) {
     for (let asset of album.assets) {
       html += await immichImageShortcode(asset.id);
     }
-    html += '</div>';
+    html += "</div>";
   }
-  html += '</div>';
+  html += "</div>";
   return html;
 }
 
@@ -93,13 +93,13 @@ async function immichRenderAlbum(album) {
  * @returns {Promise<string>} - A promise that resolves with the generated HTML.
  */
 async function immichRenderImage(image) {
-  let alt = image.assetData.exifInfo.description ?? 'No image description available';
+  let alt = image.assetData.exifInfo.description ?? "No image description available";
 
   let metadata = await Image(image.assetFile, {
     widths: [300, 600],
     formats: ["jpeg"],
-    outputDir: 'public/media/img/',
-    urlPath: '/media/img/'
+    outputDir: "public/media/img/",
+    urlPath: "/media/img/",
   });
 
   let attributes = {
@@ -150,10 +150,12 @@ async function immichImageShortcode(uuid) {
  *   - headers {Object} - The headers for requests, including the 'x-api-key' header with the API key.
  */
 function immichConfig() {
-  let required_vars = ['IMMICH_BASE_URL', 'IMMICH_API_KEY'];
+  let required_vars = ["IMMICH_BASE_URL", "IMMICH_API_KEY"];
   for (let name of required_vars) {
     if (!process.env[name]) {
-      throw new Error(`Immich plugin requires setting the following env vars: ${required_vars.join(', ')}`);
+      throw new Error(
+        `Immich plugin requires setting the following env vars: ${required_vars.join(", ")}`,
+      );
     }
   }
 
@@ -162,9 +164,9 @@ function immichConfig() {
     apikey: process.env.IMMICH_API_KEY,
     defaultFetchOptions: {
       headers: {
-        'x-api-key': process.env.IMMICH_API_KEY,
-      }
-    }
+        "x-api-key": process.env.IMMICH_API_KEY,
+      },
+    },
   };
 }
 
@@ -180,11 +182,11 @@ function EleventyImmich(eleventyConfig) {
 
   // Verify connectivity.
   EleventyFetch(`${config.url}/api/users/me`, {
-    type: 'json',
+    type: "json",
     fetchOptions: {
       ...config.defaultFetchOptions,
-      ...{accept: 'application/json'}
-    }
+      ...{ accept: "application/json" },
+    },
   }).then((res) => {
     console.log(`Connected to Immich as ${res.name}.`);
   });
@@ -192,10 +194,10 @@ function EleventyImmich(eleventyConfig) {
   // eleventyConfig.addCollection("immich_albums", immichAlbumsCollection);
   eleventyConfig.addShortcode("immich_album", immichAlbumShortcode);
   eleventyConfig.addShortcode("immich_image", immichImageShortcode);
-};
+}
 
 module.exports = {
   EleventyImmich,
   immichAlbumShortcode,
-  immichImageShortcode
+  immichImageShortcode,
 };

@@ -18,14 +18,14 @@ Immich itself is in rapid development and there are occasional [breaking changes
 
 E2E test against an Immich instance requires setting these variables, then running `npm test`.
 
-| Variable | Value                            |
-|--|----------------------------------|
-| IMMICH_BASE_URL | Base URL of your Immich instance |
-| IMMICH_API_KEY | An Immich API key                |
-| IMMICH_TEST_ALBUM_UUID | UUID of a test album             |
-| IMMICH_TEST_ALBUM_TITLE | Title of the test album          |
+| Variable                      | Value                            |
+| ----------------------------- | -------------------------------- |
+| IMMICH_BASE_URL               | Base URL of your Immich instance |
+| IMMICH_API_KEY                | An Immich API key                |
+| IMMICH_TEST_ALBUM_UUID        | UUID of a test album             |
+| IMMICH_TEST_ALBUM_TITLE       | Title of the test album          |
 | IMMICH_TEST_ALBUM_DESCRIPTION | Description of the test album    |
-| IMMICH_TEST_IMAGE_UUID | UUID of a test image             |
+| IMMICH_TEST_IMAGE_UUID        | UUID of a test image             |
 | IMMICH_TEST_IMAGE_DESCRIPTION | Description of the test image    |
 
 ## License
