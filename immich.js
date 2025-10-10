@@ -160,41 +160,6 @@ async function immichImageShortcode(uuid, eleventyConfig) {
 }
 
 /**
- * Retrieves the Immich configuration settings required for the plugin.
- *
- * Verifies that required environment variables are set and throws error if any are missing.
- *
- * Returns an object containing Immich base URL, API key, and default fetch options.
- *
- * @throws {Error} If any of the required environment variables are missing, an error is thrown.
- *
- * @returns {Object} An object containing the following properties:
- * - url {string} - The Immich base URL.
- * - apikey {string} - The Immich API key.
- * - defaultFetchOptions {Object} - The default fetch options for making requests to Immich API.
- *   - headers {Object} - The headers for requests, including the 'x-api-key' header with the API key.
- */
-function getConfig() {
-  let required_vars = ['IMMICH_BASE_URL', 'IMMICH_API_KEY'];
-  for (let name of required_vars) {
-    if (!process.env[name]) {
-      throw new Error(`Immich plugin requires setting the following env vars: ${required_vars.join(', ')}`);
-    }
-  }
-
-  return {
-    url: process.env.IMMICH_BASE_URL,
-    apikey: process.env.IMMICH_API_KEY,
-    cacheDuration: process.env.IMMICH_CACHE_DURATION || "1w",
-    defaultFetchOptions: {
-      headers: {
-        'x-api-key': process.env.IMMICH_API_KEY,
-      }
-    }
-  };
-}
-
-/**
  * Adds Immich-related configurations to Eleventy.
  *
  * Validates Immich connectivity.
