@@ -18,7 +18,7 @@ async function immichGetAlbumData(uuid) {
   let albumUrl = `${config.url}/api/albums/${uuid}`;
 
   return await EleventyFetch(albumUrl, {
-    duration: "10m",
+    duration: config.cacheDuration,
     type: "json",
     fetchOptions: {
       ...config.defaultFetchOptions,
@@ -41,14 +41,14 @@ async function immichGetImageData(uuid) {
 
   fetchOptions.headers.accept = 'application/json';
   let assetData = await EleventyFetch(assetDataUrl, {
-    duration: "10m",
+    duration: config.cacheDuration,
     type: "json",
     fetchOptions: fetchOptions
   });
 
   fetchOptions.headers.accept = 'application/octet-stream';
   let assetFile = await EleventyFetch(assetFileUrl, {
-    duration: "1w",
+    duration: config.cacheDuration,
     type: "buffer",
     fetchOptions: fetchOptions
   });
@@ -160,6 +160,7 @@ function immichConfig() {
   return {
     url: process.env.IMMICH_BASE_URL,
     apikey: process.env.IMMICH_API_KEY,
+    cacheDuration: process.env.IMMICH_CACHE_DURATION || "1w",
     defaultFetchOptions: {
       headers: {
         'x-api-key': process.env.IMMICH_API_KEY,
