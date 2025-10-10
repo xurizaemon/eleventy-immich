@@ -6,19 +6,20 @@
 
 const EleventyFetch = require("@11ty/eleventy-fetch");
 const Image = require("@11ty/eleventy-img");
+// const { EleventyRenderPlugin } = require("@11ty/eleventy");
 
 /**
  * Fetches album data by Immich album UUID.
  *
  * @param {string} uuid - The UUID of the album.
+ * @param {Object} config - The configuration object containing API URL and cache duration.
  * @return {Promise<Object>} - A promise that resolves to the album data.
  */
-async function immichGetAlbumData(uuid) {
-  let config = immichConfig();
-  let albumUrl = `${config.url}/api/albums/${uuid}`;
+async function immichGetAlbumData(uuid, config) {
+  let albumUrl = `${config.api_url}/api/albums/${uuid}`;
 
   return await EleventyFetch(albumUrl, {
-    duration: "10m",
+    duration: config.cacheDuration,
     type: "json",
     fetchOptions: {
       ...config.defaultFetchOptions,
@@ -31,24 +32,25 @@ async function immichGetAlbumData(uuid) {
  * Fetches image data for a given Immich asset UUID.
  *
  * @param {string} uuid - The UUID of the image asset.
+ * @param {Object} eleventyConfig - The Eleventy configuration object.
  * @returns {Promise<Object>} - An object containing the image data and file.
  */
-async function immichGetImageData(uuid) {
-  let config = immichConfig();
-  let assetDataUrl = `${config.url}/api/assets/${uuid}`;
-  let assetFileUrl = `${config.url}/api/assets/${uuid}/original`;
-  let fetchOptions = config.defaultFetchOptions;
+async function immichGetImageData(uuid, eleventyConfig) {
+  let assetDataUrl = `${eleventyConfig.immichConfig.api_url}/api/assets/${uuid}`;
+  let assetFileUrl = `${eleventyConfig.immichConfig.api_url}/api/assets/${uuid}/original`;
 
+  let fetchOptions = eleventyConfig.immichConfig.defaultFetchOptions;
   fetchOptions.headers.accept = 'application/json';
+
   let assetData = await EleventyFetch(assetDataUrl, {
-    duration: "10m",
+    duration: eleventyConfig.immichConfig.cacheDuration,
     type: "json",
     fetchOptions: fetchOptions
   });
 
   fetchOptions.headers.accept = 'application/octet-stream';
   let assetFile = await EleventyFetch(assetFileUrl, {
-    duration: "1w",
+    duration: eleventyConfig.immichConfig.cacheDuration,
     type: "buffer",
     fetchOptions: fetchOptions
   });
@@ -67,23 +69,39 @@ async function immichGetImageData(uuid) {
  * @param {string} [album.description] - The description of the album.
  * @param {Array} album.assets - The assets in the album.
  * @param {string} album.assets[].id - The ID of the asset.
- *
+ * @param {Object} eleventyConfig - The Eleventy configuration object.
  * @return {Promise<string>} The HTML string representing the rendered album.
  */
-async function immichRenderAlbum(album) {
-  let html = `<div class="immich-album"><h2>${album.albumName}</h2>`;
-  if (album.description) {
-    html += `<p>${album.description}</p>`;
-  }
-  if (album.assets.length) {
-    html += '<div class="immich-album-assets">';
-    for (let asset of album.assets) {
-      html += await immichImageShortcode(asset.id);
-    }
-    html += '</div>';
-  }
-  html += '</div>';
-  return html;
+async function immichRenderAlbum(album, eleventyConfig) {
+  const templateData = {
+    albumName: album.albumName,
+    description: album.description,
+    assets: await Promise.all(
+      album.assets.map(async (asset) => ({
+        html: await immichImageShortcode(asset.id, eleventyConfig),
+      }))
+    ),
+  };
+
+  console.log(eleventyConfig.nunjucks, 'config');
+
+  const albumTemplate = `
+    <div class="immich-album">
+      <h2>{{ albumName }}</h2>
+      {% if description %}
+        <p>{{ description }}</p>
+      {% endif %}
+      {% if assets.length %}
+        <div class="immich-album-assets">
+          {% for asset in assets %}
+            {{ asset.html }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>`;
+
+  // Assumptions ...
+  return eleventyConfig.nunjucks.renderString(albumTemplate, templateData);
 }
 
 /**
@@ -113,24 +131,31 @@ async function immichRenderImage(image) {
 }
 
 /**
- * Fetches an album and renders each asset.
+ * Renders an album based on a UUID and the configuration object.
  *
- * @param uuid
- * @returns {Promise<string>}
+ * @param {string} uuid - The UUID of the album.
+ * @param {object} eleventyConfig - Eleventy's configuration object.
+ * @returns {Promise<string>} - A promise that resolves to the generated HTML for the album.
  */
-async function immichAlbumShortcode(uuid) {
-  let album = await immichGetAlbumData(uuid);
-  return immichRenderAlbum(album);
+async function immichAlbumShortcode(uuid, eleventyConfig) {
+  console.log(eleventyConfig, 'immichAlbumShortcode');
+
+  // Fetch the album data using the provided UUID and config.
+  let album = await immichGetAlbumData(uuid, eleventyConfig.immichConfig);
+
+  // Render the album to HTML
+  return immichRenderAlbum(album, eleventyConfig);
 }
 
 /**
  * Fetches image data and file from a given UUID, generates HTML for image element.
  *
  * @param {string} uuid - The UUID of the image asset.
+ * @param {object} eleventyConfig - Eleventy's configuration object.
  * @returns {Promise<string>} - A promise that resolves to the generated HTML for the image element.
  */
-async function immichImageShortcode(uuid) {
-  let image = await immichGetImageData(uuid);
+async function immichImageShortcode(uuid, eleventyConfig) {
+  let image = await immichGetImageData(uuid, eleventyConfig);
   return immichRenderImage(image);
 }
 
@@ -149,7 +174,7 @@ async function immichImageShortcode(uuid) {
  * - defaultFetchOptions {Object} - The default fetch options for making requests to Immich API.
  *   - headers {Object} - The headers for requests, including the 'x-api-key' header with the API key.
  */
-function immichConfig() {
+function getConfig() {
   let required_vars = ['IMMICH_BASE_URL', 'IMMICH_API_KEY'];
   for (let name of required_vars) {
     if (!process.env[name]) {
@@ -160,6 +185,7 @@ function immichConfig() {
   return {
     url: process.env.IMMICH_BASE_URL,
     apikey: process.env.IMMICH_API_KEY,
+    cacheDuration: process.env.IMMICH_CACHE_DURATION || "1w",
     defaultFetchOptions: {
       headers: {
         'x-api-key': process.env.IMMICH_API_KEY,
@@ -174,6 +200,7 @@ function immichConfig() {
  * Validates Immich connectivity.
  *
  * @param {Object} eleventyConfig - The Eleventy config object.
+ * @param {Function} config - A function that returns the Immich configuration object.
  */
 function EleventyImmich(eleventyConfig, config) {
   ['api_url', 'api_key'].forEach(required => {
@@ -181,12 +208,17 @@ function EleventyImmich(eleventyConfig, config) {
       throw new Error(`EleventyImmich requires config ${required}`);
     }
   });
-  if (!config.api_url) {
-    throw new Error('EleventyImmich config "api_url" not found.')
-  }
-  if (!config.api_key) {
-    throw new Error('EleventyImmich config "api_key" not found.')
-  }
+
+  config = {
+    url: config.api_url,
+    apikey: config.api_key,
+    cacheDuration: config.cacheDuration || "1w",
+    defaultFetchOptions: {
+      headers: {
+        'x-api-key': config.api_key,
+      }
+    }
+  };
 
   // Verify connectivity.
   EleventyFetch(`${config.api_url}/api/users/me`, {
@@ -196,16 +228,19 @@ function EleventyImmich(eleventyConfig, config) {
       ...{accept: 'application/json'}
     }
   }).then((res) => {
-    console.log(`Connected to Immich as ${res.name}.`);
+    console.debug(`Connected to Immich as ${res.name}.`);
   });
 
+  // Provide configuration to shortcodes via eleventy config ... Is this weird?
+  eleventyConfig.immichConfig = config;
   // eleventyConfig.addCollection("immich_albums", immichAlbumsCollection);
-  eleventyConfig.addShortcode("immich_album", immichAlbumShortcode);
-  eleventyConfig.addShortcode("immich_image", immichImageShortcode);
+  eleventyConfig.addShortcode("immich_album", (uuid) => immichAlbumShortcode(uuid, eleventyConfig));
+  eleventyConfig.addShortcode("immich_image", (uuid) => immichImageShortcode(uuid, eleventyConfig));
 };
 
 module.exports = {
   EleventyImmich,
   immichAlbumShortcode,
-  immichImageShortcode
+  immichImageShortcode,
+  immichRenderAlbum
 };
