@@ -2,9 +2,10 @@ const path = require("path");
 const fs = require("fs");
 const test = require("ava");
 
-const Eleventy = require("@11ty/eleventy");
-// const { EleventyImmich } = require('../immich');
+const eleventyModule = require("@11ty/eleventy");
 const { EleventyImmich} = require('../immich');
+
+const Eleventy = eleventyModule.Eleventy || eleventyModule;
 
 function getContentFor(results, filename) {
   const entry = results.find((entry) => entry.outputPath.endsWith(filename));
@@ -46,7 +47,6 @@ permalink: /test-album/
   };
 
   let elev = new Eleventy(EleventyConfig.dir.input, EleventyConfig.dir.output, {
-    configPath: path.join(__dirname, "fixtures", "stub", "eleventy.config.js"),
     config: function (eleventyConfig) {
       eleventyConfig.setUseTemplateCache(false);
       eleventyConfig.addPlugin(EleventyImmich, {
