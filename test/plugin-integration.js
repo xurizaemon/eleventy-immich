@@ -60,22 +60,23 @@ test.before(async (t) => {
   // Replace the require cache entry for EleventyFetch
   require.cache[require.resolve('@11ty/eleventy-fetch')].exports = t.context.fetchStub;
 
-  // Create our test image markdown file
+  // Create markdown files; tests will check the output of these.
   const testImagePath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-image.njk');
+  const testAlbumPath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-album.njk');
+
   const imageMarkdown = `---
 permalink: /test-image/
 ---
 {% immich_image "${process.env.IMMICH_TEST_IMAGE_UUID || 'test-image-uuid'}" %}`;
-  fs.writeFileSync(testImagePath, imageMarkdown);
-  t.context.testImagePath = testImagePath;
 
-  // Create our test image markdown file
-  const testAlbumPath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-album.njk');
   const albumMarkdown = `---
 permalink: /test-album/
 ---
 {% immich_album "${process.env.IMMICH_TEST_ALBUM_UUID || 'test-image-uuid'}" %}`;
+
+  fs.writeFileSync(testImagePath, imageMarkdown);
   fs.writeFileSync(testAlbumPath, albumMarkdown);
+  t.context.testImagePath = testImagePath;
   t.context.testAlbumPath = testAlbumPath;
 
   let EleventyConfig = {
