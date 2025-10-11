@@ -81,7 +81,7 @@ async function immichRenderAlbum(album, config) {
     const images = await Promise.all(
       album.assets.map(async asset => {
         let image = await immichGetImageData(asset.id, config);
-        return immichRenderImage(image, config)
+        return immichRenderImage(image, config);
       })
     );
 
