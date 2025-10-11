@@ -70,6 +70,7 @@ test("Test image shortcode output", async (t) => {
   const imageContent = getContentFor(t.context.results, 'dist/test-image/index.html');
 
   const expectedDescription = process.env.IMMICH_TEST_IMAGE_DESCRIPTION || 'Test image description';
+
   t.regex(imageContent, new RegExp(`alt="${expectedDescription}"`), 'Should contain alt text with description');
   t.regex(imageContent, /src="\/media\/img\//, 'Should contain image src path');
   t.regex(imageContent, /loading="lazy"/, 'Should have lazy loading');
