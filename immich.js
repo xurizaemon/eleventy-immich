@@ -7,6 +7,44 @@
 const EleventyFetch = require("@11ty/eleventy-fetch");
 const Image = require("@11ty/eleventy-img");
 
+async function immichGetAlbumData(uuid, config) {
+  let albumUrl = `${config.api_url}/api/albums/${uuid}`;
+  return await EleventyFetch(albumUrl, {
+    duration: config.cacheDuration,
+    type: "json",
+    fetchOptions: {
+      ...config.defaultFetchOptions,
+      ...{ accept: 'application/json' }
+    }
+  });
+}
+
+async function immichGetImageData(uuid, config) {
+  let assetDataUrl = `${config.api_url}/api/assets/${uuid}`;
+  let assetFileUrl = `${config.api_url}/api/assets/${uuid}/original`;
+  let fetchOptions = config.defaultFetchOptions;
+
+  fetchOptions.headers.accept = 'application/json';
+  let assetData = await EleventyFetch(assetDataUrl, {
+    duration: config.cacheDuration,
+    type: "json",
+    // headers: { 'x-api-key': config.api_key }
+    fetchOptions: fetchOptions
+  });
+
+  fetchOptions.headers.accept = 'application/octet-stream';
+  let assetFile = await EleventyFetch(assetFileUrl, {
+    duration: config.cacheDuration,
+    type: "buffer",
+    fetchOptions: fetchOptions
+  });
+
+  return {
+    assetData: assetData,
+    assetFile: assetFile,
+  };
+}
+
 /**
  * Render an album with images for each asset.
  *
@@ -94,44 +132,13 @@ function EleventyImmich(eleventyConfig, options = {}) {
   });
 
   eleventyConfig.addAsyncShortcode("immich_album", async function(uuid) {
-    let albumUrl = `${config.api_url}/api/albums/${uuid}`;
-
-    let album = await EleventyFetch(albumUrl, {
-      duration: config.cacheDuration,
-      type: "json",
-      fetchOptions: {
-        ...config.defaultFetchOptions,
-        ...{ accept: 'application/json' }
-      }
-    });
-
+    let album = await immichGetAlbumData(uuid, config);
     return immichRenderAlbum(album);
   });
 
   eleventyConfig.addAsyncShortcode("immich_image", async function(uuid) {
-    let assetDataUrl = `${config.api_url}/api/assets/${uuid}`;
-    let assetFileUrl = `${config.api_url}/api/assets/${uuid}/original`;
-    let fetchOptions = config.defaultFetchOptions;
-
-    fetchOptions.headers.accept = 'application/json';
-    let assetData = await EleventyFetch(assetDataUrl, {
-      duration: config.cacheDuration,
-      type: "json",
-      // headers: { 'x-api-key': config.api_key }
-      fetchOptions: fetchOptions
-    });
-
-    fetchOptions.headers.accept = 'application/octet-stream';
-    let assetFile = await EleventyFetch(assetFileUrl, {
-      duration: config.cacheDuration,
-      type: "buffer",
-      fetchOptions: fetchOptions
-    });
-
-    return immichRenderImage({
-      assetData: assetData,
-      assetFile: assetFile
-    });
+    let image = await immichGetImageData(uuid, config);
+    return immichRenderImage(image);
   });
 };
 
