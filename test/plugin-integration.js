@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const test = require("ava");
-const sinon = require("sinon");
 
 const Eleventy = require("@11ty/eleventy");
 // const { EleventyImmich } = require('../immich');
@@ -20,46 +19,6 @@ function getContentFor(results, filename) {
  * then the tests will validate the output.
  */
 test.before(async (t) => {
-  // Mock responses & stub eleventyfetch.
-  const mockUserResponse = { name: "Test User" };
-  const mockAlbumResponse = {
-    albumName: process.env.IMMICH_TEST_ALBUM_TITLE || "Test Album",
-    description: process.env.IMMICH_TEST_ALBUM_DESCRIPTION || "Test Description",
-    assets: [
-      { id: "test-asset-1" },
-      { id: "test-asset-2" }
-    ]
-  };
-  const mockAssetDataResponse = {
-    exifInfo: {
-      description: "Test image description"
-    }
-  };
-  const mockAssetFileResponse = Buffer.from("fake-image-data");
-
-  // Stub EleventyFetch
-  t.context.fetchStub = sinon.stub();
-
-  // Mock different responses based on URL
-  t.context.fetchStub.callsFake(async (url) => {
-    if (url.includes('/api/users/me')) {
-      return mockUserResponse;
-    }
-    if (url.includes('/api/albums/')) {
-      return mockAlbumResponse;
-    }
-    if (url.includes('/api/assets/') && url.includes('/original')) {
-      return mockAssetFileResponse;
-    }
-    if (url.includes('/api/assets/')) {
-      return mockAssetDataResponse;
-    }
-    throw new Error(`Unmocked URL: ${url}`);
-  });
-
-  // Replace the require cache entry for EleventyFetch
-  require.cache[require.resolve('@11ty/eleventy-fetch')].exports = t.context.fetchStub;
-
   // Create markdown files; tests will check the output of these.
   const testImagePath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-image.njk');
   const testAlbumPath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-album.njk');
