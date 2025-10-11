@@ -7,6 +7,13 @@
 const EleventyFetch = require("@11ty/eleventy-fetch");
 const Image = require("@11ty/eleventy-img");
 
+/**
+ * Fetches album data by Immich album UUID.
+ *
+ * @param {string} uuid - The UUID of the album.
+ * @param {Object} config - Eleventy Immich plugin configuration.
+ * @return {Promise<Object>} - A promise that resolves to the album data.
+ */
 async function immichGetAlbumData(uuid, config) {
   let albumUrl = `${config.api_url}/api/albums/${uuid}`;
   return await EleventyFetch(albumUrl, {
@@ -19,6 +26,13 @@ async function immichGetAlbumData(uuid, config) {
   });
 }
 
+/**
+ * Fetches a combo of image meta and data for a given Immich asset UUID.
+ *
+ * @param {string} uuid - The UUID of the image asset.
+ * @param {Object} config - Eleventy Immich plugin configuration.
+ * @returns {Promise<Object>} - An object containing the image data and file.
+ */
 async function immichGetImageData(uuid, config) {
   let assetDataUrl = `${config.api_url}/api/assets/${uuid}`;
   let assetFileUrl = `${config.api_url}/api/assets/${uuid}/original`;
