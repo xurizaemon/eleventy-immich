@@ -67,19 +67,26 @@ async function immichGetImageData(uuid, config) {
  * @param {string} [album.description] - The description of the album.
  * @param {Array} album.assets - The assets in the album.
  * @param {string} album.assets[].id - The ID of the asset.
+ * @param {Object} config - Immich plugin configuration.
  *
  * @return {Promise<string>} The HTML string representing the rendered album.
  */
-async function immichRenderAlbum(album) {
+async function immichRenderAlbum(album, config) {
   let html = `<div class="immich-album"><h2>${album.albumName}</h2>`;
   if (album.description) {
     html += `<p>${album.description}</p>`;
   }
+
   if (album.assets.length) {
+    const images = await Promise.all(
+      album.assets.map(async asset => {
+        let image = await immichGetImageData(asset.id, config);
+        return immichRenderImage(image, config)
+      })
+    );
+
     html += '<div class="immich-album-assets">';
-    for (let asset of album.assets) {
-      // html += await immichImageShortcode(asset.id);
-    }
+    html += images.join('');
     html += '</div>';
   }
   html += '</div>';
@@ -147,7 +154,7 @@ function EleventyImmich(eleventyConfig, options = {}) {
 
   eleventyConfig.addAsyncShortcode("immich_album", async function(uuid) {
     let album = await immichGetAlbumData(uuid, config);
-    return immichRenderAlbum(album);
+    return immichRenderAlbum(album, config);
   });
 
   eleventyConfig.addAsyncShortcode("immich_image", async function(uuid) {
