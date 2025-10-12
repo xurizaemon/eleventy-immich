@@ -7,6 +7,14 @@ const { EleventyImmich} = require('../immich');
 
 const Eleventy = eleventyModule.Eleventy || eleventyModule;
 
+// Helper to recursively remove a directory
+function removeDirectory(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    fs.rmSync(dirPath, { recursive: true, force: true });
+  }
+}
+
+// Helper to get the content for a given file in the build output
 function getContentFor(results, filename) {
   const entry = results.find((entry) => entry.outputPath.endsWith(filename));
   if (!entry) {
@@ -20,6 +28,11 @@ function getContentFor(results, filename) {
  * then the tests will validate the output.
  */
 test.before(async (t) => {
+  const cacheDir = path.join(__dirname, '..', '.cache');
+  removeDirectory(cacheDir);
+  const distDir = path.join(__dirname, 'fixtures', 'stub', 'dist');
+  removeDirectory(distDir);
+
   // Create markdown files; tests will check the output of these.
   const testImagePath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-image.njk');
   const testAlbumPath = path.join(__dirname, 'fixtures', 'stub', 'input', 'test-album.njk');
@@ -64,6 +77,23 @@ permalink: /test-album/
   t.true(Array.isArray(results));
 
   t.context.results = results;
+});
+
+test.after.always((t) => {
+  // Clean up test files
+  if (t.context.testImagePath && fs.existsSync(t.context.testImagePath)) {
+    fs.unlinkSync(t.context.testImagePath);
+  }
+  if (t.context.testAlbumPath && fs.existsSync(t.context.testAlbumPath)) {
+    fs.unlinkSync(t.context.testAlbumPath);
+  }
+
+  // Clean up cache and output directories after tests
+  const cacheDir = path.join(__dirname, '..', '.cache');
+  removeDirectory(cacheDir);
+
+  const distDir = path.join(__dirname, 'fixtures', 'stub', 'dist');
+  removeDirectory(distDir);
 });
 
 test("Test image shortcode output", async (t) => {
