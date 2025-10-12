@@ -1,6 +1,6 @@
 {
   "name": "@xurizaemon/eleventy-immich",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Provides shortcodes and embed functionality to integrate Immich media into Eleventy.",
   "main": "immich.js",
   "repository": {
