@@ -116,7 +116,7 @@ async function immichRenderImage(image) {
     decoding: "async",
   };
 
-  return Promise.resolve(Image.generateHTML(metadata, attributes));
+  return Image.generateHTML(metadata, attributes);
 }
 
 /**
