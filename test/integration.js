@@ -96,7 +96,7 @@ test.after.always((t) => {
   removeDirectory(distDir);
 });
 
-test("Test image shortcode output", async (t) => {
+test.serial("Test image shortcode output", async (t) => {
   const imageContent = getContentFor(t.context.results, 'dist/test-image/index.html');
 
   const expectedDescription = process.env.IMMICH_TEST_IMAGE_DESCRIPTION || 'Test image description';
@@ -107,7 +107,7 @@ test("Test image shortcode output", async (t) => {
   t.regex(imageContent, /decoding="async"/, 'Should have async decoding');
 });
 
-test("Test album shortcode output", async (t) => {
+test.serial("Test album shortcode output", async (t) => {
   const albumContent = getContentFor(t.context.results, 'dist/test-album/index.html');
 
   const expectedTitle = process.env.IMMICH_TEST_ALBUM_TITLE || 'Test album';
