@@ -28,7 +28,7 @@
   "devDependencies": {
     "@11ty/eleventy": "^2.0 || ^3.0",
     "@11ty/eleventy-fetch": "^5.0.0",
-    "@11ty/eleventy-img": "^4.0.1",
+    "@11ty/eleventy-img": "^6.0.0",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.5.0",
     "ava": "^6.1.3",
