@@ -118,6 +118,7 @@ async function immichRenderImage(image) {
 
   return Promise.resolve(Image.generateHTML(metadata, attributes));
 }
+
 /**
  * Adds Immich-related configurations to Eleventy.
  *
@@ -159,7 +160,7 @@ function EleventyImmich(eleventyConfig, options = {}) {
 
   eleventyConfig.addAsyncShortcode("immich_image", async function(uuid) {
     let image = await immichGetImageData(uuid, config);
-    return immichRenderImage(image);
+    return await immichRenderImage(image);
   });
 };
 
