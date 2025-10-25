@@ -4,6 +4,7 @@ const test = require("ava");
 
 const eleventyModule = require("@11ty/eleventy");
 const { EleventyImmich} = require('../immich');
+const timeoutMs = process.env.TEST_TIMEOUT_MS ? parseInt(process.env.TEST_TIMEOUT_MS, 10) : 10000;
 
 const Eleventy = eleventyModule.Eleventy || eleventyModule;
 
@@ -28,6 +29,7 @@ function getContentFor(results, filename) {
  * then the tests will validate the output.
  */
 test.before(async (t) => {
+  t.timeout(timeoutMs);
   const cacheDir = path.join(__dirname, '..', '.cache');
   removeDirectory(cacheDir);
   const distDir = path.join(__dirname, 'fixtures', 'stub', 'dist');
@@ -97,6 +99,7 @@ test.after.always((t) => {
 });
 
 test("Test image shortcode output", async (t) => {
+  t.timeout(timeoutMs);
   const imageContent = getContentFor(t.context.results, 'dist/test-image/index.html');
 
   const expectedDescription = process.env.IMMICH_TEST_IMAGE_DESCRIPTION || 'Test image description';
@@ -108,6 +111,7 @@ test("Test image shortcode output", async (t) => {
 });
 
 test("Test album shortcode output", async (t) => {
+  t.timeout(timeoutMs);
   const albumContent = getContentFor(t.context.results, 'dist/test-album/index.html');
 
   const expectedTitle = process.env.IMMICH_TEST_ALBUM_TITLE || 'Test album';
