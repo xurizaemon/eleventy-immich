@@ -36,22 +36,24 @@ async function immichGetAlbumData(uuid, config) {
 async function immichGetImageData(uuid, config) {
   let assetDataUrl = `${config.api_url}/api/assets/${uuid}`;
   let assetFileUrl = `${config.api_url}/api/assets/${uuid}/original`;
-  let fetchOptions = config.defaultFetchOptions;
 
-  fetchOptions.headers.accept = 'application/json';
-  let assetData = await EleventyFetch(assetDataUrl, {
-    duration: config.cacheDuration,
-    type: "json",
-    // headers: { 'x-api-key': config.api_key }
-    fetchOptions: fetchOptions
-  });
+  let jsonFetchOptions = config.defaultFetchOptions;
+  jsonFetchOptions.headers.accept = 'application/json';
+  let binaryFetchOptions = config.defaultFetchOptions;
+  binaryFetchOptions.headers.accept = 'application/octet-stream';
 
-  fetchOptions.headers.accept = 'application/octet-stream';
-  let assetFile = await EleventyFetch(assetFileUrl, {
-    duration: config.cacheDuration,
-    type: "buffer",
-    fetchOptions: fetchOptions
-  });
+  const [assetData, assetFile] = await Promise.all([
+    EleventyFetch(assetDataUrl, {
+      duration: config.cacheDuration,
+      type: "json",
+      fetchOptions: jsonFetchOptions
+    }),
+    EleventyFetch(assetFileUrl, {
+      duration: config.cacheDuration,
+      type: "buffer",
+      fetchOptions: binaryFetchOptions
+    })
+  ]);
 
   return {
     assetData: assetData,
