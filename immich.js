@@ -78,12 +78,19 @@ async function immichRenderAlbum(album, config) {
   }
 
   if (album.assets.length) {
-    const images = await Promise.all(
-      album.assets.map(async asset => {
-        let image = await immichGetImageData(asset.id, config);
-        return immichRenderImage(image, config);
-      })
+    // Fetch all image data in parallel
+    const imageDataPromises = album.assets.map(asset =>
+      immichGetImageData(asset.id, config)
     );
+    const imageDataList = await Promise.all(imageDataPromises);
+
+    // Queue image processing in parallel
+    const imagePromises = imageDataList.map(image =>
+      immichRenderImage(image, config)
+    );
+
+    // Wait for image processing to complete
+    const images = await Promise.all(imagePromises);
 
     html += '<div class="immich-album-assets">';
     html += images.join('');
@@ -102,12 +109,16 @@ async function immichRenderAlbum(album, config) {
 async function immichRenderImage(image) {
   let alt = image.assetData.exifInfo.description ?? 'No image description available';
 
-  let metadata = await Image(image.assetFile, {
+  // Queue the image processing
+  let metadataPromise = Image(image.assetFile, {
     widths: [300, 600],
     formats: ["jpeg"],
     outputDir: 'public/media/img/',
     urlPath: '/media/img/'
   });
+
+  // Wait for processing to complete
+  let metadata = await metadataPromise;
 
   let attributes = {
     alt: alt,
@@ -116,8 +127,9 @@ async function immichRenderImage(image) {
     decoding: "async",
   };
 
-  return Promise.resolve(Image.generateHTML(metadata, attributes));
+  return Image.generateHTML(metadata, attributes);
 }
+
 /**
  * Adds Immich-related configurations to Eleventy.
  *
