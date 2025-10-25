@@ -37,10 +37,14 @@ async function immichGetImageData(uuid, config) {
   let assetDataUrl = `${config.api_url}/api/assets/${uuid}`;
   let assetFileUrl = `${config.api_url}/api/assets/${uuid}/original`;
 
-  let jsonFetchOptions = { ...config.defaultFetchOptions };
-  jsonFetchOptions.headers.accept = 'application/json';
-  let binaryFetchOptions = { ...config.defaultFetchOptions };
-  binaryFetchOptions.headers.accept = 'application/octet-stream';
+  let jsonFetchOptions = {
+    ...config.defaultFetchOptions,
+    ...{ accept: 'application/json' }
+  };
+  let binaryFetchOptions = {
+    ...config.defaultFetchOptions,
+    ...{ accept: 'application/octet-stream' }
+  };
 
   const [assetData, assetFile] = await Promise.all([
     EleventyFetch(assetDataUrl, {
